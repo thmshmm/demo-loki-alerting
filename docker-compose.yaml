@@ -31,6 +31,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.2
     volumes:
+      - ./config/promtail.yml:/etc/promtail/config.yml
       - /var/log:/var/log
     command: -config.file=/etc/promtail/config.yml
     networks:
@@ -58,10 +59,40 @@ services:
           isDefault: true
           version: 1
           editable: false
+          jsonData:
+            httpHeaderName1: "X-Scope-OrgID"
+          secureJsonData:
+            httpHeaderValue1: "team1"
         EOF
         /run.sh
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    networks:
+      - loki
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    ports:
+      - "9001:9001"
+    networks:
+      - loki
+
+  miniobuckets:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb minio/ruler;
+      /usr/bin/mc anonymous set public minio/ruler;
+      exit 0;
+      "
     networks:
       - loki

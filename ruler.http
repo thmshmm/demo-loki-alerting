@@ -1,0 +1,29 @@
+# List rule groups
+GET http://localhost:3100/loki/api/v1/rules
+X-Scope-OrgID: team1
+
+###
+
+# List rule groups by namespace
+GET http://localhost:3100/loki/api/v1/rules/namespace1
+X-Scope-OrgID: team1
+
+###
+
+# Set rule group
+POST http://localhost:3100/loki/api/v1/rules/namespace1
+X-Scope-OrgID: team1
+
+< config/loki-rules.yml
+
+###
+
+# Delete rule group
+DELETE http://localhost:3100/loki/api/v1/rules/namespace1/varlog
+X-Scope-OrgID: team1
+
+###
+
+# Get rule group
+GET http://localhost:3100/loki/api/v1/rules/namespace1/varlog
+X-Scope-OrgID: team1

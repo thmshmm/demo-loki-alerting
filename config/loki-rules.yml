@@ -1,10 +1,9 @@
-groups:
-  - name: varlog_errors
-    rules: 
-      - alert: varlog-errors
-        annotations: 
-          message: "{{ $labels.job }} contains errors."
-        expr: 'sum by (job) (count_over_time({job="varlogs"} |= `error` [5m]) > 0)'
-        for: 1m
-        labels: 
-          severity: critical
+name: varlog
+rules:
+  - alert: varlog-errors
+    annotations: 
+      message: "{{ $labels.job }} contains errors."
+    expr: 'sum by (job) (count_over_time({job="varlogs"} |= `error` [5m]) > 0)'
+    for: 1m
+    labels: 
+      severity: critical

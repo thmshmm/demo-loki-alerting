@@ -1,4 +1,4 @@
-auth_enabled: false
+auth_enabled: true
 
 server:
   http_listen_port: 3100
@@ -34,10 +34,13 @@ schema_config:
 
 ruler:
   alertmanager_url: http://alertmanager:9093
-  rule_path: /tmp/loki/rules
   storage:
-    local:
-      directory: /etc/loki/rules
-
+    type: s3
+    s3:
+      endpoint: http://minio:9000
+      s3forcepathstyle: true
+      bucketnames: "ruler"
+      access_key_id: "minioadmin"
+      secret_access_key: "minioadmin"
 analytics:
   reporting_enabled: false
