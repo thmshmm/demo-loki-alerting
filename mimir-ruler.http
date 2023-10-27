@@ -1,0 +1,29 @@
+# List all tenant rules
+GET http://localhost:9009/ruler/rule_groups
+X-Scope-OrgID: team1
+
+###
+
+# List rule groups
+GET http://localhost:9009/prometheus/config/v1/rules
+X-Scope-OrgID: team1
+
+###
+
+# Set rule group
+POST http://localhost:9009/prometheus/config/v1/rules/namespace1
+X-Scope-OrgID: team1
+
+< config/mimir-rules.yml
+
+###
+
+# Delete rule group
+DELETE http://localhost:9009/prometheus/config/v1/rules/namespace1/loki-cluster
+X-Scope-OrgID: team1
+
+###
+
+# Get rule group
+GET http://localhost:9009/prometheus/config/v1/rules/namespace1/loki-cluster
+X-Scope-OrgID: team1

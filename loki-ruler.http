@@ -19,11 +19,11 @@ X-Scope-OrgID: team1
 ###
 
 # Delete rule group
-DELETE http://localhost:3100/loki/api/v1/rules/namespace1/varlog
+DELETE http://localhost:3100/loki/api/v1/rules/namespace1/loki-cluster
 X-Scope-OrgID: team1
 
 ###
 
 # Get rule group
-GET http://localhost:3100/loki/api/v1/rules/namespace1/varlog
+GET http://localhost:3100/loki/api/v1/rules/namespace1/loki-cluster
 X-Scope-OrgID: team1

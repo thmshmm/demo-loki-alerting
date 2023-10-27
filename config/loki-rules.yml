@@ -1,9 +1,13 @@
-name: varlog
+name: loki-cluster
 rules:
-  - alert: varlog-errors
+  - alert: api:tranition:calls
     annotations: 
       message: "{{ $labels.job }} contains errors."
-    expr: 'sum by (job) (count_over_time({job="varlogs"} |= `error` [5m]) > 0)'
+    expr: 'sum by (cluster) (count_over_time({namespace="loki-dev"} |= `transition` [5m]) > 200)'
     for: 1m
     labels: 
       severity: critical
+  - record: compactor:deletes:rate5m
+    expr: 'rate({namespace="loki-dev", container="compactor"} |= `DELETE` [5m])'
+    labels:
+      environment: "dev"

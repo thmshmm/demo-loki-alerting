@@ -1,0 +1,9 @@
+name: loki-cluster
+rules:
+  - alert: compactor:deletes:rate5m
+    annotations: 
+      message: "{{ $labels.job }} contains errors."
+    expr: 'sum by (cluster) (count_over_time(compactor:deletes:rate5m{namespace="loki-dev"} [5m]) > 0)'
+    for: 1m
+    labels: 
+      severity: critical

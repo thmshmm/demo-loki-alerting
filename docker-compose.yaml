@@ -6,12 +6,25 @@ networks:
 services:
   loki:
     image: grafana/loki:2.9.2
+    container_name: loki
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yml
     volumes:
       - ./config/loki.yml:/etc/loki/local-config.yml
       - ./config/loki-rules.yml:/etc/loki/rules/fake/rules.yml
+    networks:
+      - loki
+  
+  mimir:
+    image: grafana/mimir:2.10.3
+    container_name: mimir
+    ports:
+      - "9009:9009"
+    command: -config.file=/etc/mimir/local-config.yml
+    volumes:
+      - ./config/mimir.yml:/etc/mimir/local-config.yml
+      # - ./config/loki-rules.yml:/etc/loki/rules/fake/rules.yml
     networks:
       - loki
 
@@ -28,46 +41,30 @@ services:
     networks:
       - loki
 
-  promtail:
-    image: grafana/promtail:2.9.2
+  k6:
+    build: ./k6
+    image: k6loki
+    command:
+      - 'k6'
+      - 'run'
+      - '/scripts/test-logs.js'
+    ports:
+      - "6565:6565"
     volumes:
-      - ./config/promtail.yml:/etc/promtail/config.yml
-      - /var/log:/var/log
-    command: -config.file=/etc/promtail/config.yml
+      - ./config/test-logs.js:/scripts/test-logs.js
     networks:
       - loki
 
   grafana:
+    image: grafana/grafana:latest
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-        - name: Loki
-          type: loki
-          access: proxy
-          orgId: 1
-          url: http://loki:3100
-          basicAuth: false
-          isDefault: true
-          version: 1
-          editable: false
-          jsonData:
-            httpHeaderName1: "X-Scope-OrgID"
-          secureJsonData:
-            httpHeaderValue1: "team1"
-        EOF
-        /run.sh
-    image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    volumes:
+      - ./config/grafana-ds.yaml:/etc/grafana/provisioning/datasources/ds.yaml
     networks:
       - loki
 
@@ -90,8 +87,10 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc alias set minio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb minio/ruler;
-      /usr/bin/mc anonymous set public minio/ruler;
+      /usr/bin/mc mb minio/loki;
+      /usr/bin/mc anonymous set public minio/loki;
+      /usr/bin/mc mb minio/mimir;
+      /usr/bin/mc anonymous set public minio/mimir;
       exit 0;
       "
     networks:

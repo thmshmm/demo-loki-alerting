@@ -39,8 +39,15 @@ ruler:
     s3:
       endpoint: http://minio:9000
       s3forcepathstyle: true
-      bucketnames: "ruler"
+      bucketnames: "loki"
       access_key_id: "minioadmin"
       secret_access_key: "minioadmin"
+  remote_write:
+    enabled: true
+    client:
+      url: http://mimir:9009/api/v1/push
+  wal:
+    dir: /tmp/loki/ruler-wal
+
 analytics:
   reporting_enabled: false
